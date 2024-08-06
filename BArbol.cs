@@ -46,6 +46,15 @@ namespace Laboratorio1_JR
                 else raiz = raiz.hijos[0];
             }
         }
-       
+        
+        public void EditarLibroN(Libro libroeditado)
+        {
+            if (raiz == null)
+            {
+                Console.WriteLine("El arbol esta vacio");
+                return;
+            }
+            raiz.EditarLibN(libroeditado);
+        }
     }
 }

@@ -8,21 +8,23 @@ namespace Laboratorio1_JR
 {
     public class Libro
     {
+        public string isbn { get; set; }
+
         public int ISBN;
-        public string nombre;
-        public string autor;
-        public string categoria;
-        public double precio;
+        public string name { get; set; }
+        public string author { get; set; }
+        public string price { get; set; } 
+        public double Precio;
+        public string quantity { get; set; }
         public int canStock;
 
-        public Libro(int iSBN, string nombre, string autor, string categoria, double precio, int canStock)
+        public Libro() 
         {
-            this.ISBN = iSBN;
-            this.nombre = nombre;
-            this.autor = autor;
-            this.categoria = categoria;
-            this.precio = precio;
-            this.canStock = canStock;
+            ISBN = Convert.ToInt32(isbn);
+            Precio = Convert.ToDouble(price);
+            canStock = Convert.ToInt32(quantity);
+
+
         }
     }
 }

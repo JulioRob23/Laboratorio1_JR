@@ -308,5 +308,29 @@ namespace Laboratorio1_JR
             hijos.RemoveAt(indice + 1);
         }
 
+        public void EditarLibN(Libro libroeditado)
+        {
+            int indice = 0;
+            while (indice < claves.Count && claves[indice] < libroeditado.ISBN) indice++;
+            if (indice < claves.Count && claves[indice] == libroeditado.ISBN)
+            {
+                if (libroeditado.name != null) libros[indice].name = libroeditado.name;
+                if (libroeditado.author != null) libros[indice].author = libroeditado.author;
+                if (libroeditado.Precio != -1) libros[indice].Precio = libroeditado.Precio;
+                if (libroeditado.canStock != -1) libros[indice].canStock = libroeditado.canStock;
+            }
+            else
+            {
+                if (Eshoja)
+                {
+                    Console.WriteLine("El valor buscado " + libroeditado.name + " no esta en el arbol N");
+                    return;
+                }
+                bool val = (indice == claves.Count);
+                if (val && indice > claves.Count) hijos[indice - 1].EditarLibN(libroeditado);
+                else hijos[indice].EditarLibN(libroeditado);
+            }
+        }
+
     }
 }

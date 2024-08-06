@@ -308,7 +308,46 @@ namespace Laboratorio1_JR
             libros.RemoveAt(indice);
             hijos.RemoveAt(indice + 1);
         }
+        public Libro BuscarLibro(int ISBN)
+        {
+            int i = 0;
+            while (i < claves.Count && ISBN > libros[i].ISBN) i++;
+            if (i < claves.Count && libros[i].ISBN == ISBN) return libros[i];
+            if (Eshoja) return null;
+            return hijos[i].BuscarLibro(ISBN);
+            
+        }
+        public Libro BuscarLibroP(string nombre)
+        {
+            int i = 0;
+            while (i < claves.Count && string.Compare(nombre, libros[i].name) > 0) i++;
+            if (i < claves.Count && string.Compare(nombre, libros[i].name) == 0) return libros[i];
+            if (Eshoja) return null;
+            return hijos[i].BuscarLibroP(nombre);
 
-
+        }
+        public void EditarLibP(Libro libroeditado)
+        {
+            int indice = 0;
+            while (indice < claves.Count && string.Compare(claves[indice], libroeditado.name) < 0) indice++;
+            if (indice < claves.Count && string.Compare(claves[indice], libroeditado.name) == 0)
+            {
+                if (libroeditado.name != null) libros[indice].name = libroeditado.name;
+                if (libroeditado.author != null) libros[indice].author = libroeditado.author;
+                if (libroeditado.Precio != -1) libros[indice].Precio = libroeditado.Precio;
+                if (libroeditado.canStock != -1) libros[indice].canStock = libroeditado.canStock;
+            }
+            else
+            {
+                if (Eshoja)
+                {
+                    Console.WriteLine("El valor buscado " + libroeditado.name + " no esta en el arbol P");
+                    return;
+                }
+                bool val = (indice == claves.Count);
+                if (val && indice > claves.Count) hijos[indice - 1].EditarLibP(libroeditado);
+                else hijos[indice].EditarLibP(libroeditado);
+            }
+        }
     }
 }
