@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Laboratorio1_JR
 {
@@ -33,20 +34,20 @@ namespace Laboratorio1_JR
 
         public void EliminarN(int clave, Libro ellibro)
         {
-            if(raiz == null)
+            if (raiz == null)
             {
                 Console.WriteLine("El arbol esta vacio");
                 return;
             }
             raiz.EliminarN(clave, ellibro);
 
-            if(raiz.claves.Count == 0 ) 
+            if (raiz.claves.Count == 0)
             {
                 if (raiz.Eshoja) raiz = null;
                 else raiz = raiz.hijos[0];
             }
         }
-        
+
         public void EditarLibroN(Libro libroeditado)
         {
             if (raiz == null)

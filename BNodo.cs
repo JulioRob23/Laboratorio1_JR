@@ -25,35 +25,38 @@ namespace Laboratorio1_JR
             this.hijos = new List<BNodo>();
             this.Eshoja = eshoja;
             this.elarbol = elarbol;
-            this.minclaves = ((int)Math.Ceiling(orden/2.0))-1;
-            this.maxclaves = orden -1;
+            this.minclaves = ((int)Math.Ceiling(orden / 2.0)) - 1;
+            this.maxclaves = orden - 1;
         }
 
         public void InsertarN(int key, Libro ellibro)
         {
+            Console.WriteLine($"Intentando insertar clave {key} en nodo con claves {string.Join(", ", claves)}");
             if (claves.Count == maxclaves)
             {
                 InsertarLleno(key, ellibro);
             }
             else
             {
-                InsertarNoLleno(key,ellibro);
+                InsertarNoLleno(key, ellibro);
             }
         }
-        public void InsertarLleno(int key, Libro ellibro)
-        { 
-            int i = claves.Count -1;
-            if(Eshoja)
-            {
-               while(i>= 0 && claves[i] > key) i--;
-               claves.Insert(i+1,key);
-                libros.Insert(i+1,ellibro);
+        private void InsertarLleno(int key, Libro ellibro)
+        {
+            // Mensajes de depuración
+            Console.WriteLine($"Insertar lleno clave {key} en nodo con claves {string.Join(", ", claves)}");
 
+            int i = claves.Count - 1;
+            if (Eshoja)
+            {
+                while (i >= 0 && claves[i] > key) i--;
+                claves.Insert(i + 1, key);
+                libros.Insert(i + 1, ellibro);
             }
             else
             {
                 while (i >= 0 && claves[i] > key) i--;
-                hijos[i+1].InsertarN(key,ellibro);
+                hijos[i + 1].InsertarN(key, ellibro);
             }
 
             if (claves.Count > maxclaves)
@@ -68,47 +71,71 @@ namespace Laboratorio1_JR
                 else
                 {
                     BNodo papa = EncontrarPapa(elarbol.raiz, this);
-                    papa.DividirHijo(papa.hijos.IndexOf(this),this);
+                    papa.DividirHijo(papa.hijos.IndexOf(this), this);
                 }
             }
         }
 
         public void DividirHijo(int posicionhijo, BNodo hijoadividir)
         {
-            int Medio = orden / 2;
+
+            int Medio = hijoadividir.orden / 2;
+
             BNodo nuevonodo = new BNodo(hijoadividir.orden, hijoadividir.Eshoja, elarbol);
 
-            nuevonodo.claves.AddRange(hijoadividir.claves.GetRange(Medio + 1,hijoadividir.claves.Count - (Medio+1)));
+            // Verificar que hijoadividir tenga suficientes claves para dividir
+            if (hijoadividir.claves.Count < 2 * hijoadividir.orden - 1)
+            {
+                return;
+            }
+
+            nuevonodo.claves.AddRange(hijoadividir.claves.GetRange(Medio + 1, hijoadividir.claves.Count - (Medio + 1)));
             nuevonodo.libros.AddRange(hijoadividir.libros.GetRange(Medio + 1, hijoadividir.libros.Count - (Medio + 1)));
             hijoadividir.claves.RemoveRange(Medio + 1, hijoadividir.claves.Count - (Medio + 1));
             hijoadividir.libros.RemoveRange(Medio + 1, hijoadividir.libros.Count - (Medio + 1));
 
             if (!hijoadividir.Eshoja)
             {
-                nuevonodo.hijos.AddRange(hijoadividir.hijos.GetRange(Medio + 1, hijoadividir.claves.Count - (Medio + 1)));
-                hijoadividir.hijos.RemoveRange(Medio + 1, hijoadividir.claves.Count - (Medio + 1));
-
+                nuevonodo.hijos.AddRange(hijoadividir.hijos.GetRange(Medio + 1, hijoadividir.hijos.Count - (Medio + 1)));
+                hijoadividir.hijos.RemoveRange(Medio + 1, hijoadividir.hijos.Count - (Medio + 1));
             }
 
-            hijos.Insert(posicionhijo+1,nuevonodo);
-            claves.Insert(posicionhijo, hijoadividir.claves[Medio]);
-            libros.Insert(posicionhijo, hijoadividir.libros[Medio]);
+            if (posicionhijo + 1 <= hijos.Count)
+            {
+                hijos.Insert(posicionhijo + 1, nuevonodo);
+            }
+            else
+            {
+                return;
+            }
+
+            if (posicionhijo <= claves.Count)
+            {
+                claves.Insert(posicionhijo, hijoadividir.claves[Medio]);
+                libros.Insert(posicionhijo, hijoadividir.libros[Medio]);
+            }
+            else
+            {
+                hijos.RemoveAt(posicionhijo + 1); // Revertir la inserción del nuevo nodo
+                return;
+            }
+
             hijoadividir.claves.RemoveAt(Medio);
             hijoadividir.libros.RemoveAt(Medio);
-
         }
+
 
         public BNodo EncontrarPapa(BNodo elnodo, BNodo hijo)
         {
-            if(elnodo == null|| elnodo.Eshoja)
+            if (elnodo == null || elnodo.Eshoja)
             {
                 return null;
             }
             else
             {
-                foreach(BNodo nodo in elnodo.hijos)
+                foreach (BNodo nodo in elnodo.hijos)
                 {
-                    if(nodo == hijo) return nodo;
+                    if (nodo == hijo) return nodo;
                     else
                     {
                         BNodo temp = EncontrarPapa(nodo, hijo);
@@ -121,56 +148,66 @@ namespace Laboratorio1_JR
         public void InsertarNoLleno(int key, Libro ellibro)
         {
             int i = claves.Count - 1;
-            if(Eshoja)
+            if (Eshoja)
             {
                 while (i >= 0 && claves[i] > key) i--;
                 claves.Insert(i + 1, key);
-                libros.Insert(i+1,ellibro);
+                libros.Insert(i + 1, ellibro);
             }
             else
             {
                 while (i >= 0 && claves[i] > key) i--;
-                hijos[i+1].InsertarN(key, ellibro);
+                hijos[i + 1].InsertarN(key, ellibro);
             }
         }
 
         public void EliminarN(int key, Libro ellibro)
         {
+            Console.WriteLine($"Intentando eliminar clave {key} en nodo con claves {string.Join(", ", claves)}");
             int indice = 0;
-            while(indice<claves.Count && claves[indice]< key) indice++;
-            if(indice < claves.Count && claves[indice] == key)
+            while (indice < claves.Count && claves[indice] < key) indice++;
+            if (indice < claves.Count && claves[indice] == key)
             {
-                if (Eshoja) Eliminardehoja(indice);
-                else EliminarNodehoja(indice);
+                if (Eshoja)
+                {
+                    Eliminardehoja(indice);
+                }
+                else
+                {
+                    EliminarNodehoja(indice);
+                }
             }
             else
             {
                 if (Eshoja)
                 {
-                    Console.WriteLine("El valor buscado " + key + " no esta en el arbol");
+                    Console.WriteLine($"El valor buscado {key} no está en el árbol");
                     return;
                 }
                 bool val = (indice == claves.Count);
                 if (hijos[indice].claves.Count < minclaves) Llenar(indice);
-                if(val&& indice> claves.Count) hijos[indice-1].EliminarN(key, ellibro);
-                else hijos[indice].EliminarN(key,ellibro);
+                if (val && indice > claves.Count) hijos[indice - 1].EliminarN(key, ellibro);
+                else hijos[indice].EliminarN(key, ellibro);
             }
         }
-        
-        public void Eliminardehoja(int indice)
+
+
+        private void Eliminardehoja(int indice)
         {
+            Console.WriteLine($"Eliminando de hoja en índice {indice} con claves {string.Join(", ", claves)}");
             claves.RemoveAt(indice);
             libros.RemoveAt(indice);
 
-            if(claves.Count < minclaves && this != elarbol.raiz)
+            if (claves.Count < minclaves && this != elarbol.raiz)
             {
                 BNodo papa = EncontrarPapa(elarbol.raiz, this);
                 int indicepapa = papa.hijos.IndexOf(this);
                 papa.Llenar(indicepapa);
             }
         }
-        public void EliminarNodehoja(int indice)
+        private void EliminarNodehoja(int indice)
         {
+            Console.WriteLine($"Eliminando de nodo no hoja en índice {indice} con claves {string.Join(", ", claves)}");
             int clave = claves[indice];
             Libro ellbro = libros[indice];
 
@@ -184,14 +221,14 @@ namespace Laboratorio1_JR
 
                 if (hijos[indice].claves.Count > minclaves) Llenar(indice);
             }
-            else if (hijos[indice+1].claves.Count >= minclaves)
+            else if (hijos[indice + 1].claves.Count >= minclaves)
             {
                 int siguiente = ObtenerSiguiente(indice);
                 claves[indice] = siguiente;
                 Libro lsiguiente = ObtenerLSiguiente(indice);
                 libros[indice] = lsiguiente;
-                hijos[indice + 1].EliminarN(siguiente,lsiguiente);
-                if (hijos[indice+1].claves.Count > minclaves) Llenar(indice+1);
+                hijos[indice + 1].EliminarN(siguiente, lsiguiente);
+                if (hijos[indice + 1].claves.Count > minclaves) Llenar(indice + 1);
             }
             else
             {
@@ -203,7 +240,7 @@ namespace Laboratorio1_JR
         {
             BNodo actual = hijos[indice];
             while (!actual.Eshoja) actual = actual.hijos[actual.claves.Count];
-            return actual.claves[actual.claves.Count-1];
+            return actual.claves[actual.claves.Count - 1];
         }
         public Libro ObtenerLAnterior(int indice)
         {
@@ -236,7 +273,7 @@ namespace Laboratorio1_JR
                 if (indice > 0) Unir(indice - 1);
                 else Unir(indice);
 
-                if(claves.Count < minclaves && this != elarbol.raiz)
+                if (claves.Count < minclaves && this != elarbol.raiz)
                 {
                     BNodo papa = EncontrarPapa(elarbol.raiz, this);
                     int indicepapa = papa.hijos.IndexOf(this);
@@ -256,9 +293,9 @@ namespace Laboratorio1_JR
 
             if (!hijo.Eshoja) hijo.hijos.Insert(0, hermano.hijos[hermano.hijos.Count - 1]);
 
-            claves[indice-1] = hermano.claves[hermano.claves.Count-1];
+            claves[indice - 1] = hermano.claves[hermano.claves.Count - 1];
             hermano.claves.RemoveAt(hermano.claves.Count - 1);
-            libros[indice-1] = hermano.libros[hermano.libros.Count-1];
+            libros[indice - 1] = hermano.libros[hermano.libros.Count - 1];
             hermano.libros.RemoveAt(hermano.libros.Count - 1);
 
             if (!hermano.Eshoja) hermano.hijos.RemoveAt(hermano.hijos.Count - 1);
@@ -289,15 +326,15 @@ namespace Laboratorio1_JR
             hijo.claves.Add(claves[indice]);
             hijo.libros.Add(libros[indice]);
 
-            for(int i = 0; i < hermano.claves.Count; i++)
+            for (int i = 0; i < hermano.claves.Count; i++)
             {
                 hijo.claves.Add(hermano.claves[i]);
                 hijo.libros.Add(hermano.libros[i]);
             }
 
-            if(!hijo.Eshoja)
+            if (!hijo.Eshoja)
             {
-                for(int i = 0; i <= hijo.claves.Count; ++i)
+                for (int i = 0; i <= hijo.claves.Count; ++i)
                 {
                     hijo.hijos.Add(hermano.hijos[i]);
                 }

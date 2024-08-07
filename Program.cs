@@ -1,29 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Laboratorio1_JR;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
-        string csvRutadeArchivo = @"C:\Users\Julio Javier\Desktop\Javi\U Landivar\Segundo semestre 2024\Estructura de datos II\lab\Laboratorio 1\lab01_books.csv";
+        string csvRutadeArchivo = @"C:\Users\rayrt\source\repos\Laboratorio1_JR\lab01_books.csv";
         BArbol arbolN = new BArbol(11);
         BArbolP arbolP = new BArbolP(11);
 
         try
         {
-            StreamReader lector = new StreamReader(csvRutadeArchivo);
+            using (StreamReader lector = new StreamReader(csvRutadeArchivo))
+            {
+                string linea;
 
-            string linea; 
-
-                while((linea = lector.ReadLine()) != null)
+                while ((linea = lector.ReadLine()) != null)
                 {
                     string[] partes = linea.Split(';');
-                    if(partes.Length > 1)
+                    if (partes.Length > 1)
                     {
                         string proceso = partes[0].Trim();
                         string JSON = partes[1].Trim();
@@ -32,41 +27,64 @@ internal class Program
                         {
                             case "INSERT":
                                 Libro ellibro = JsonSerializer.Deserialize<Libro>(JSON);
-                                arbolN.InsertarN(ellibro.ISBN, ellibro);
-                                        arbolP.InsertarP(ellibro.name, ellibro);
+
+                                if (ellibro != null)
+                                {
+                                    ellibro.datos();
+                                    arbolN.InsertarN(ellibro.ISBN, ellibro);
+                                    arbolP.InsertarP(ellibro.name, ellibro);
+                                }
                                 break;
                             case "PATCH":
                                 Libro libroeditar = JsonSerializer.Deserialize<Libro>(JSON);
-                                Libro librooriginal = BuscarLibro(arbolP, libroeditar.ISBN);
-                                if (librooriginal == null) Console.WriteLine("El libro no esta en el arbol");
-                                else
+                                if (libroeditar != null)
                                 {
-                                    arbolP.EditarLibroP(libroeditar);
-                                    arbolN.EditarLibroN(libroeditar);
+                                    Libro librooriginal = BuscarLibro(arbolP, libroeditar.ISBN);
+                                    if (librooriginal == null)
+                                    {
+                                        Console.WriteLine("El libro no está en el árbol");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"Editando libro: {libroeditar.name} con ISBN: {libroeditar.ISBN}");
+                                        arbolP.EditarLibroP(libroeditar);
+                                        arbolN.EditarLibroN(libroeditar);
+                                    }
                                 }
                                 break;
                             case "DELETE":
                                 EE eliminar = JsonSerializer.Deserialize<EE>(JSON);
-                                Libro ellibroelimi = BuscarLibro(arbolP, eliminar.ISBN);
-                                if (ellibroelimi == null) Console.WriteLine("La clave no esta en el arbol");
-                                else
+                                if (eliminar != null)
                                 {
-                                    arbolP.EliminarN(ellibroelimi.name, ellibroelimi);
-                                    arbolN.EliminarN(eliminar.ISBN, ellibroelimi);
+                                    Libro ellibroelimi = BuscarLibro(arbolP, eliminar.ISBN);
+                                    if (ellibroelimi == null)
+                                    {
+                                        Console.WriteLine("La clave no está en el árbol");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"Eliminando libro con ISBN: {eliminar.ISBN}");
+                                        arbolP.EliminarN(ellibroelimi.name, ellibroelimi);
+                                        arbolN.EliminarN(eliminar.ISBN, ellibroelimi);
+                                    }
                                 }
                                 break;
-                            default: Console.WriteLine("Metodo no reconocido");
+                            default:
+                                Console.WriteLine("Método no reconocido");
                                 break;
                         }
                     }
                 }
+            }
         }
         catch (Exception e)
         {
             Console.WriteLine("Error al leer el archivo: " + e.Message);
         }
+
+
         Console.WriteLine("Archivo Cargado");
-        string rutabusqueda = @"C:\Users\Julio Javier\Desktop\Javi\U Landivar\Segundo semestre 2024\Estructura de datos II\lab\Laboratorio 1\lab01_search.csv";
+        string rutabusqueda = @"C:\Users\rayrt\source\repos\Laboratorio1_JR\lab01_search.csv";
         List<Libro> libros = new List<Libro>();
         try
         {
@@ -86,11 +104,13 @@ internal class Program
                     {
                         case "SEARCH":
                             LB buscar = JsonSerializer.Deserialize<LB>(JSON);
-                            Libro ellibro = BuscarLibroL(arbolP,buscar.name);
-                            libros.Add(ellibro);
+                            if (buscar != null)
+                            {
+                                libros.AddRange(BuscarLibroL(arbolP, buscar.name));
+                            }
                             break;
                         default:
-                            Console.WriteLine("Metodo no reconocido");
+                            Console.WriteLine("Método no reconocido");
                             break;
                     }
                 }
@@ -101,7 +121,7 @@ internal class Program
             Console.WriteLine("");
         }
         string jsonString = JsonSerializer.Serialize(libros);
-        File.WriteAllText("Datos Busqueda",jsonString);
+        File.WriteAllText("search.txt", jsonString);
         Console.Write("Archivo creado");
     }
 
@@ -110,9 +130,9 @@ internal class Program
         Libro milibro = elarbol.raiz.BuscarLibro(ISBN);
         return milibro;
     }
-    public static Libro BuscarLibroL(BArbolP elarbol, string nombre)
+    public static List<Libro> BuscarLibroL(BArbolP elarbol, string nombre)
     {
-        Libro milibro = elarbol.raiz.BuscarLibroP(nombre);
-        return milibro;
+        return elarbol.BuscarPorNombre(nombre);
     }
+
 }

@@ -13,18 +13,16 @@ namespace Laboratorio1_JR
         public int ISBN;
         public string name { get; set; }
         public string author { get; set; }
-        public string price { get; set; } 
+        public string price { get; set; }
         public double Precio;
         public string quantity { get; set; }
         public int canStock;
 
-        public Libro() 
+        public void datos()
         {
-            ISBN = Convert.ToInt32(isbn);
-            Precio = Convert.ToDouble(price);
-            canStock = Convert.ToInt32(quantity);
-
-
+            this.ISBN = Convert.ToInt32(isbn);
+            this.Precio = Convert.ToDouble(price);
+            this.canStock = Convert.ToInt32(quantity);
         }
     }
 }
